@@ -1,0 +1,21 @@
+[package]
+name = "xr-cli"
+version = "0.1.0"
+description = "Ferramenta de linha de comando, só leitura, para o XREAL One Pro."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "xr"
+path = "src/main.rs"
+
+[dependencies]
+xr-proto = { path = "../xr-proto" }
+xr-client = { path = "../xr-client" }
+xr-sim = { path = "../xr-sim" }
+tokio = { version = "1.53.3", features = ["rt-multi-thread", "net", "time", "sync", "macros", "io-util", "signal", "fs"] }
+
+[dev-dependencies]
+xr-proto = { path = "../xr-proto" }

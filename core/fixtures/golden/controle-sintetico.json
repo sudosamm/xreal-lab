@@ -1,0 +1,106 @@
+[
+ {
+  "tipo": "resposta",
+  "magic": "271d",
+  "nome": "sw_version",
+  "valor": "1.9.1.SINTETICO"
+ },
+ {
+  "tipo": "evento",
+  "magic": "272e",
+  "descricao": "tecla: botão inferior (menu) apertado (t=4242)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "272e",
+  "descricao": "tecla: botão inferior (menu) solto (t=4300)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: clique em botão inferior (menu) (t=5.123s)"
+ },
+ {
+  "tipo": "resposta",
+  "magic": "272d",
+  "nome": "dsp_version",
+  "valor": "15.SINTETICO"
+ },
+ {
+  "tipo": "evento",
+  "magic": "278a",
+  "descricao": "sensor 0 = 50.0 (provável temperatura, °C)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "278a",
+  "descricao": "sensor 1 = 44.4 (provável temperatura, °C)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "278a",
+  "descricao": "sensor 2 = 35.9 (provável temperatura, °C)"
+ },
+ {
+  "tipo": "resposta",
+  "magic": "2718",
+  "nome": "proximity_enabled",
+  "valor": true
+ },
+ {
+  "tipo": "resposta",
+  "magic": "28a6",
+  "nome": "eis_enabled",
+  "valor": false
+ },
+ {
+  "tipo": "evento",
+  "magic": "272e",
+  "descricao": "tecla: rocker traseiro (volume −) apertado (t=9000)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: duplo clique em botão superior (atalho) (t=9.999s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: código 35, parâmetro 0 (t=10.000s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: brilho − → nível 8 (t=91.217s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: brilho + → nível 9 (t=125.409s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: filtro → nível 1 (t=143.098s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: clique em 9 (t=0.000s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2712",
+  "descricao": "ação: filtro → nível 2 (t=203.950s)"
+ },
+ {
+  "tipo": "evento",
+  "magic": "2766",
+  "descricao": "magic=2766 bruto=1802278a"
+ },
+ {
+  "tipo": "evento",
+  "magic": "272e",
+  "descricao": "tecla: 7 9 (t=1)"
+ }
+]

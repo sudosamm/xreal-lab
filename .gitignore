@@ -1,0 +1,13 @@
+# Dados privados ou de terceiros: nunca publicar
+notes/config-onepro.json
+captures/
+targets/
+refs/
+core/fixtures/local/
+
+# Build
+core/target/
+app/build/
+app/.dart_tool/
+app/rust/target/
+__pycache__/

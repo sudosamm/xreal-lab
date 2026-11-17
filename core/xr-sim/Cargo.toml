@@ -1,0 +1,12 @@
+[package]
+name = "xr-sim"
+version = "0.1.0"
+description = "Óculos simulado (portas 52996, 52998, 52999) para testes e desenvolvimento sem o aparelho."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+tokio = { version = "1.53.3", features = ["rt-multi-thread", "net", "time", "sync", "macros", "io-util"] }
+xr-proto = { path = "../xr-proto" }
