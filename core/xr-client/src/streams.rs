@@ -17,7 +17,7 @@ use crate::{connect_any, Link, Shared};
 
 pub async fn run_imu(sh: Arc<Shared>) {
     loop {
-        if let Some((s, host)) = connect_any(&sh.cfg, |e| e.imu_port).await {
+        if let Some((s, host)) = connect_any(&sh, |e| e.imu_port).await {
             sh.state.send_modify(|st| st.imu = Link::Connected { host });
             if let Err(e) = imu_session(&sh, s).await {
                 tracing::info!("IMU: {e}");
@@ -90,7 +90,7 @@ async fn imu_session(sh: &Shared, mut s: TcpStream) -> Result<(), String> {
 
 pub async fn run_vsync(sh: Arc<Shared>) {
     loop {
-        if let Some((s, host)) = connect_any(&sh.cfg, |e| e.vsync_port).await {
+        if let Some((s, host)) = connect_any(&sh, |e| e.vsync_port).await {
             sh.state.send_modify(|st| st.vsync = Link::Connected { host });
             if let Err(e) = vsync_session(&sh, s).await {
                 tracing::info!("vsync: {e}");

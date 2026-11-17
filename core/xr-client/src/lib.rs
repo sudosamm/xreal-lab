@@ -146,6 +146,8 @@ pub(crate) struct Shared {
     pub orientation: watch::Sender<Option<Orientation>>,
     pub calibration: watch::Sender<Option<Arc<Calibration>>>,
     pub recenter: AtomicU64,
+    /// Android: `Network.getNetworkHandle()` da rede do óculos (0 = rede padrão)
+    pub network: AtomicU64,
 }
 
 pub struct Glasses {
@@ -172,6 +174,7 @@ impl Glasses {
             orientation: watch::channel(None).0,
             calibration: watch::channel(None).0,
             recenter: AtomicU64::new(0),
+            network: AtomicU64::new(0),
         });
         let (cmd, cmd_rx) = mpsc::channel(16);
         let tasks = vec![
@@ -192,6 +195,13 @@ impl Glasses {
 
     pub fn orientation(&self) -> watch::Receiver<Option<Orientation>> {
         self.shared.orientation.subscribe()
+    }
+
+    /// Android: liga as próximas conexões à rede do óculos (`Network.getNetworkHandle()`).
+    /// `None` volta para a rede padrão. Conexões já abertas não mudam; as que caírem
+    /// religam na rede nova. Fora do Android não tem efeito.
+    pub fn set_network(&self, handle: Option<u64>) {
+        self.shared.network.store(handle.unwrap_or(0), Ordering::Relaxed);
     }
 
     /// Zera a guinada na direção atual.
@@ -224,10 +234,11 @@ impl Glasses {
 }
 
 /// Tenta cada endereço em ordem. Devolve o socket e o host que respondeu.
-pub(crate) async fn connect_any(cfg: &ClientConfig, port: impl Fn(&Endpoint) -> u16) -> Option<(TcpStream, String)> {
-    for ep in &cfg.endpoints {
+pub(crate) async fn connect_any(sh: &Shared, port: impl Fn(&Endpoint) -> u16) -> Option<(TcpStream, String)> {
+    let net = sh.network.load(Ordering::Relaxed);
+    for ep in &sh.cfg.endpoints {
         let addr = format!("{}:{}", ep.host, port(ep));
-        match tokio::time::timeout(cfg.connect_timeout, TcpStream::connect(&addr)).await {
+        match tokio::time::timeout(sh.cfg.connect_timeout, connect_one(&addr, net)).await {
             Ok(Ok(s)) => {
                 let _ = s.set_nodelay(true);
                 return Some((s, ep.host.clone()));
@@ -237,4 +248,57 @@ pub(crate) async fn connect_any(cfg: &ClientConfig, port: impl Fn(&Endpoint) -> 
         }
     }
     None
+}
+
+async fn connect_one(addr: &str, network: u64) -> std::io::Result<TcpStream> {
+    if network == 0 {
+        return TcpStream::connect(addr).await;
+    }
+    let sa = tokio::net::lookup_host(addr)
+        .await?
+        .next()
+        .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "endereço inválido"))?;
+    let sock = if sa.is_ipv4() { tokio::net::TcpSocket::new_v4()? } else { tokio::net::TcpSocket::new_v6()? };
+    bind_to_network(&sock, network)?;
+    sock.connect(sa).await
+}
+
+/// No Android, um app comum usa a rede padrão (Wi-Fi); a rede USB do óculos não tem
+/// internet e não é a padrão. `android_setsocknetwork` (libandroid, API 23+) liga o
+/// socket à rede escolhida antes de conectar.
+#[cfg(target_os = "android")]
+fn bind_to_network(sock: &tokio::net::TcpSocket, network: u64) -> std::io::Result<()> {
+    use std::os::fd::AsRawFd;
+    #[link(name = "android")]
+    extern "C" {
+        fn android_setsocknetwork(network: u64, fd: std::os::raw::c_int) -> std::os::raw::c_int;
+    }
+    // SAFETY: o descritor é válido enquanto `sock` existe; a função só lê os dois argumentos.
+    let r = unsafe { android_setsocknetwork(network, sock.as_raw_fd()) };
+    if r == 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+}
+
+#[cfg(not(target_os = "android"))]
+fn bind_to_network(_sock: &tokio::net::TcpSocket, _network: u64) -> std::io::Result<()> {
+    Ok(()) // fora do Android a rota do sistema já resolve
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Fora do Android, o caminho com rede escolhida usa TcpSocket e conecta normalmente.
+    #[tokio::test]
+    async fn conecta_com_rede_escolhida() {
+        let l = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = l.local_addr().unwrap().to_string();
+        let accept = tokio::spawn(async move { l.accept().await.map(|_| ()) });
+        let s = connect_one(&addr, 7).await.unwrap();
+        assert_eq!(s.peer_addr().unwrap().to_string(), addr);
+        accept.await.unwrap().unwrap();
+    }
 }

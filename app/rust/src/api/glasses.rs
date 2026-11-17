@@ -297,6 +297,12 @@ impl Session {
         });
     }
 
+    /// Android: rede do óculos (`Network.getNetworkHandle()`), ou `None` para a padrão.
+    #[frb(sync)]
+    pub fn set_network(&self, handle: Option<i64>) {
+        self.glasses.set_network(handle.and_then(|h| u64::try_from(h).ok()).filter(|h| *h != 0));
+    }
+
     #[frb(sync)]
     pub fn recenter(&self) {
         self.glasses.recenter();

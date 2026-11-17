@@ -38,12 +38,26 @@ class SessionController {
 
   GlassesApi? get api => _api;
 
+  /// Android: último handle da rede do óculos (repassado a cada nova sessão).
+  int? _network;
+  StreamSubscription<int?>? _networkSub;
+
+  /// Acompanha a rede do óculos informada pelo Android.
+  void followNetwork(Stream<int?> networks) {
+    _networkSub?.cancel();
+    _networkSub = networks.listen((h) {
+      _network = h;
+      _api?.setNetwork(h);
+    });
+  }
+
   Future<void> start({required bool simulated}) async {
     await stop();
     this.simulated.value = simulated;
     try {
       final api = await _factory(simulated: simulated);
       _api = api;
+      if (!simulated) api.setNetwork(_network);
       error.value = null;
       _subs.add(api.watchState().listen(_onState));
       _subs.add(api.watchOrientation().listen((o) => orientation.value = o));
@@ -87,6 +101,7 @@ class SessionController {
   void clearEvents() => events.value = UnmodifiableListView(const []);
 
   void dispose() {
+    _networkSub?.cancel();
     stop();
   }
 }

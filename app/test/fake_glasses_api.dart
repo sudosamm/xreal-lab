@@ -60,6 +60,10 @@ class FakeGlassesApi implements GlassesApi {
   @override
   void recenter() => recenters++;
 
+  int? network;
+  @override
+  void setNetwork(int? handle) => network = handle;
+
   @override
   Future<void> setAdjustmentsEnabled(bool on) async {
     emitState(sampleState(adjustmentsEnabled: on, brightness: current.brightness, dimmer: current.dimmer));

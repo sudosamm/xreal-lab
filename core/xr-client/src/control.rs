@@ -142,7 +142,7 @@ pub async fn run(sh: Arc<Shared>, mut cmd_rx: mpsc::Receiver<Cmd>) {
     let mut gate = Gate::new();
     sync_gate(&sh, &gate);
     loop {
-        let conn = match wait_with_cmds(&sh, &mut gate, &mut cmd_rx, connect_any(&sh.cfg, |e| e.control_port)).await {
+        let conn = match wait_with_cmds(&sh, &mut gate, &mut cmd_rx, connect_any(&sh, |e| e.control_port)).await {
             ControlFlow::Break(()) => return,
             ControlFlow::Continue(c) => c,
         };

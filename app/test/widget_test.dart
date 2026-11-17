@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:xr_lab/core/session_controller.dart';
@@ -145,6 +147,22 @@ void main() {
     expect(find.text('-15,0°'), findsOneWidget);
     await tester.tap(find.byKey(const Key('recentrar')));
     expect(fake.recenters, 1);
+  });
+
+  testWidgets('a rede do Android é repassada à sessão e às seguintes', (tester) async {
+    final fake = FakeGlassesApi();
+    final c = SessionController(({required bool simulated}) async => fake);
+    final redes = StreamController<int?>();
+    c.followNetwork(redes.stream);
+    redes.add(1234);
+    await tester.pump();
+    await c.start(simulated: false);
+    expect(fake.network, 1234);
+    redes.add(null);
+    await tester.pump();
+    expect(fake.network, isNull);
+    await redes.close();
+    c.dispose();
   });
 
   group('capturas', () {

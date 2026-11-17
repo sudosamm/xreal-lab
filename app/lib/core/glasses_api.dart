@@ -9,6 +9,9 @@ abstract class GlassesApi {
   Stream<OrientationDto> watchOrientation();
   Stream<EventDto> watchEvents();
   void recenter();
+
+  /// Android: liga as conexões à rede do óculos. Fora do Android não faz nada.
+  void setNetwork(int? handle);
   Future<void> setAdjustmentsEnabled(bool on);
 
   /// Etapa 1 do ajuste: só descreve. Nada é enviado ao óculos.
@@ -44,6 +47,8 @@ class RustGlassesApi implements GlassesApi {
   Stream<EventDto> watchEvents() => _session.watchEvents();
   @override
   void recenter() => _session.recenter();
+  @override
+  void setNetwork(int? handle) => _session.setNetwork(handle: handle);
   @override
   Future<void> setAdjustmentsEnabled(bool on) => _session.setAdjustmentsEnabled(on_: on);
   @override

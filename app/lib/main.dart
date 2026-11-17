@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'core/android_bridge.dart';
 import 'core/glasses_api.dart';
 import 'core/session_controller.dart';
 import 'src/rust/frb_generated.dart';
@@ -16,6 +17,10 @@ Future<void> main(List<String> args) async {
   final controller = SessionController(
     ({required bool simulated}) => RustGlassesApi.start(simulated: simulated, auditPath: audit),
   );
+  if (AndroidBridge.available) {
+    controller.followNetwork(AndroidBridge.glassesNetwork());
+    await AndroidBridge.startService();
+  }
   final simulated = args.contains('--sim') || Platform.environment['XR_SIM'] == '1';
   await controller.start(simulated: simulated);
   runApp(XrLabApp(controller: controller));

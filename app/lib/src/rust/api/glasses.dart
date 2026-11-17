@@ -23,6 +23,9 @@ abstract class Session implements RustOpaqueInterface {
 
   Future<void> setAdjustmentsEnabled({required bool on_});
 
+  /// Android: rede do óculos (`Network.getNetworkHandle()`), ou `None` para a padrão.
+  void setNetwork({PlatformInt64? handle});
+
   static Future<Session> start({required SessionConfig config}) =>
       RustLib.instance.api.crateApiGlassesSessionStart(config: config);
 
